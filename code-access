@@ -1,0 +1,134 @@
+// Version finale avec image de Thomas et logos visibles
+import { useEffect, useRef, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search, FileText } from "lucide-react";
+
+const operatorLogos = [
+  { name: "Swisscom", src: "https://upload.wikimedia.org/wikipedia/fr/thumb/e/e0/Swisscom_Logo_2019.svg/2560px-Swisscom_Logo_2019.svg.png" },
+  { name: "Yallo", src: "https://upload.wikimedia.org/wikipedia/commons/5/5d/Yallo_logo.png" },
+  { name: "Sunrise", src: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Sunrise_communications_logo.svg/2560px-Sunrise_communications_logo.svg.png" },
+  { name: "Salt", src: "https://upload.wikimedia.org/wikipedia/commons/1/13/Salt_Logo.svg" },
+  { name: "Talktalk", src: "https://upload.wikimedia.org/wikipedia/en/thumb/f/fc/TalkTalk_Group_logo.svg/2560px-TalkTalk_Group_logo.svg.png" },
+  { name: "Teleboy", src: "https://play-lh.googleusercontent.com/hgx1GdvOQ9MzZ_F3qntuj7OvQonQnTOfU-WzK0N9bNqqY0ZQxPkaNhhBJx1cC5E3ZRE" },
+  { name: "Post Mobile", src: "https://upload.wikimedia.org/wikipedia/commons/8/8c/Postfinance_Logo.svg" },
+  { name: "Wingo", src: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Wingo_logo_2021.svg/2560px-Wingo_logo_2021.svg.png" },
+  { name: "Lebara", src: "https://upload.wikimedia.org/wikipedia/en/7/70/Lebara_Logo_2021.svg" },
+  { name: "Autre", src: "https://cdn-icons-png.flaticon.com/512/565/565547.png" }
+];
+
+export default function SubscriptionForm() {
+  const [step, setStep] = useState(1);
+  const formRef = useRef(null);
+  const audioRef = useRef(null);
+  const totalSteps = 10;
+
+  const [formData, setFormData] = useState({ name: "", surname: "", email: "", phone: "" });
+  const [formErrors, setFormErrors] = useState({ email: false, phone: false });
+
+  useEffect(() => {
+    if (formRef.current) {
+      formRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [step]);
+
+  const validateForm = () => {
+    const emailValid = formData.email.includes("@");
+    const phoneValid = /^\+41\d{9}$/.test(formData.phone);
+    setFormErrors({ email: !emailValid, phone: !phoneValid });
+    return emailValid && phoneValid;
+  };
+
+  const handleStepChange = (nextStep) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+    }
+    setStep(nextStep);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = () => {
+    if (validateForm()) {
+      handleStepChange(10);
+    }
+  };
+
+  const progressPercentage = Math.min((step / totalSteps) * 100, 100);
+
+  return (
+    <div className="bg-[#f5faff] min-h-screen p-4 text-gray-800">
+      <audio ref={audioRef} src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_4e98bc1d0d.mp3?filename=click-124467.mp3" preload="auto" />
+
+      <div className="max-w-3xl mx-auto space-y-4" ref={formRef}>
+        {/* HEADER */}
+        <div className="bg-white shadow-md rounded-2xl p-6 space-y-6">
+          <div className="flex justify-between items-center">
+            <img src="/logo.svg" alt="Logo" className="h-10 w-auto" />
+            <h1 className="text-lg sm:text-xl font-bold text-[#1e90ff] text-right">
+              Économisez en changeant de forfait, profitez des actions du moment.
+            </h1>
+          </div>
+          <div className="flex justify-center gap-6 mt-4">
+            <div className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-[#1e90ff]" />
+              <h2 className="text-sm font-medium">Choisissez l’offre faite pour vous</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-[#1e90ff]" />
+              <h2 className="text-sm font-medium">100% indépendant et transparent</h2>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+          <div className="h-full bg-[#1e90ff] transition-all duration-500" style={{ width: `${progressPercentage}%` }}></div>
+        </div>
+
+        {step === 1 && (
+          <div className="bg-white shadow-lg rounded-2xl p-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Thomas" className="w-10 h-10 rounded-full" />
+              <div>
+                <p className="text-sm text-gray-600">Thomas vient de rejoindre la conversation.</p>
+                <h2 className="text-lg font-semibold mt-2">
+                  J'ai besoin de quelques informations pour vous trouver l’offre la plus économique et adaptée à vos besoins disponibles à votre adresse.
+                </h2>
+              </div>
+            </div>
+            <Button onClick={() => handleStepChange(2)} className="rounded-full px-6 py-2 bg-[#1e90ff] text-white">Commencer</Button>
+          </div>
+        )}
+
+        {step === 2 && (
+          <StepBlock title="Pourquoi changez-vous de fournisseur ?" options={["Un top réseau", "Un bouquet adapté", "Des conseillers disponibles", "Vitesse", "Prix trop élevé", "Mon déménagement", "Je n’ai pas de fournisseur", "Autre"]} nextStep={3} handleStepChange={handleStepChange} />
+        )}
+
+        {step === 3 && (
+          <StepBlock title="De quel type d'offre souhaitez-vous profiter ?" options={["Abonnement mobile", "Mobile + Fibre", "Fibre + TV + Mobile"]} nextStep={4} handleStepChange={handleStepChange} prevStep={2} />
+        )}
+
+        {step === 4 && (
+          <div className="bg-white shadow-lg rounded-2xl p-6 space-y-4">
+            <h2 className="text-lg font-semibold">Pour vous proposer la meilleure offre parmi les opérateurs</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {operatorLogos.map(({ name, src }) => (
+                <Button key={name} className="p-2 rounded-xl flex items-center justify-center h-16 bg-white border hover:shadow-md" onClick={() => handleStepChange(5)}>
+                  <img src={src} alt={name} className="max-h-10 object-contain" />
+                </Button>
+              ))}
+            </div>
+            <Button variant="outline" onClick={() => handleStepChange(3)} className="mt-4">← Précédent</Button>
+          </div>
+        )}
+
+        {/* ...reste du formulaire inchangé... */}
+      </div>
+    </div>
+  );
+}
